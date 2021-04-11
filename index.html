@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bitmex client.</title>
+    <!-- This html is basically stolen from some chat example and modified to have appropriate messages sent. -->
+    <!-- Cause sun shines behind my window and i don't want to spend more time on this assignment to make it pretty -->
+    <script type="text/javascript">
+        window.onload = function () {
+            let conn;
+            let msg = document.getElementById("msg");
+            let log = document.getElementById("log");
+
+            function appendLog(item) {
+                let doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+                log.appendChild(item);
+                if (doScroll) {
+                    log.scrollTop = log.scrollHeight - log.clientHeight;
+                }
+            }
+
+            document.getElementById("unsub").onclick = function () {
+                if (!conn) {
+                    return false;
+                }
+
+                message = {
+                    "action": "unsubscribe",
+                };
+
+                conn.send(JSON.stringify(message));
+                console.log(message);
+                return false;
+            }
+
+            document.getElementById("form").onsubmit = function () {
+                if (!conn) {
+                    return false;
+                }
+
+                message = {
+                    "action": "subscribe",
+                    "symbols": msg.value.split(',')
+                }
+                conn.send(JSON.stringify(message));
+                console.log(message);
+                return false;
+            };
+
+            if (window["WebSocket"]) {
+                const params = window.location.href.split("/");
+                const roomId = params[params.length - 1];
+                conn = new WebSocket("ws://" + document.location.host + "/ws");
+                conn.onclose = function (evt) {
+                    let item = document.createElement("div");
+                    item.innerHTML = "<b>Connection closed.</b>";
+                    appendLog(item);
+                };
+                conn.onmessage = function (evt) {
+                    let messages = evt.data.split('\n');
+
+                    for (let i = 0; i < messages.length; i++) {
+                        let item = document.createElement("div");
+                        item.innerText = messages[i];
+                        appendLog(item);
+                    }
+                };
+            } else {
+                let item = document.createElement("div");
+                item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+                appendLog(item);
+            }
+        };
+    </script>
+    <style type="text/css">
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            background: gray;
+        }
+
+        #log {
+            background: white;
+            margin: 0;
+            padding: 0.5em 0.5em 0.5em 0.5em;
+            position: absolute;
+            top: 0.5em;
+            left: 0.5em;
+            right: 0.5em;
+            bottom: 3em;
+            overflow: auto;
+        }
+
+        #form {
+            padding: 0 0.5em 0 0.5em;
+            margin: 0;
+            position: absolute;
+            bottom: 1em;
+            left: 0px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+    </style>
+</head>
+<body>
+<div id="log"></div>
+<form id="form">
+    <label for="msg"> Type is comma separated list of symbols to subscribe to:</label>
+    <input type="text" id="msg" size="64" autofocus/>
+    <input type="submit" value="Subscribe"/>
+    <input type="button" id="unsub" value="Unsubscribe">
+</form>
+</body>
+</html>
