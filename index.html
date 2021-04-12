@@ -39,7 +39,7 @@
 
                 message = {
                     "action": "subscribe",
-                    "symbols": msg.value.split(',')
+                    "symbols": msg.value.split(',').filter(symb => symb.length > 0)
                 }
                 conn.send(JSON.stringify(message));
                 console.log(message);

@@ -59,7 +59,7 @@ func NewWsClient(w http.ResponseWriter, r *http.Request, broadcst *Broadcaster) 
 
 func (wsc *WsClient) Serve(ctx context.Context) {
 	//fmt.Println("serving new client")
-	wsc.broadcst.AddConsumer(wsc.con)
+	//wsc.broadcst.AddConsumer(wsc.con) // as simple as that we don't initially subscribe
 	defer wsc.Close()
 
 	go wsc.readMessages(ctx)
